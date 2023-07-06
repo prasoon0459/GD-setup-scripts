@@ -1,65 +1,5 @@
-import requests
-import re
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import random
-import sys
-
-
-tailor_base_url = 'http://ssai-tailor-nginx-ingress-k8-pp.npe.hotstar-labs.com/' 
-
-
-def getMasterManifestUrls(bearer, match_id):
-    master_file = open('master.csv', 'w')
-    cms_headers = {
-        'Accept': '*/*',
-        'Accept-Language': 'en-GB,en;q=0.9',
-        'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token',
-        'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Origin': '*',
-        'Connection': 'keep-alive',
-        'Authorization': bearer,
-        'Content-Type': 'application/json; charset=utf8',
-        'Origin': 'https://admin-pp.hotstar.com',
-        'Referer': 'https://admin-pp.hotstar.com/',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'cross-site',
-        'Sec-GPC': '1',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Mobile Safari/537.36',
-        'sec-ch-ua': '"Brave";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
-        'sec-ch-ua-mobile': '?1',
-        'sec-ch-ua-platform': '"Android"',
-        'x-tenant-id': 'in'
-    }
-    base_url = 'https://cmsosiris-pp.pp.hotstar-labs.com/match/' + match_id
-    response = requests.get(base_url, headers=cms_headers, verify=False)
-    playback_sets = response.json()['body']['results']['clipPlaybackSet']
-
-    ssai_urls = []
-
-    for obj in playback_sets:
-        playback_tags = obj['playbackTags']
-        cnt_tags = 0
-        for tag in playback_tags:
-            if (tag['name']== 'ads'):
-                cnt_tags += 1
-                if tag['value'] != 'ssai':
-                    break
-            
-            elif (tag['name']== 'resolution'):
-                cnt_tags += 1
-                if tag['value'] != 'fhd':
-                    break
-
-            if cnt_tags == 2:
-                url = obj['playbackUrl']
-                url = tailor_base_url + re.search(r'http(.*)(hls.*)', url).group(2)
-                master_file.write(url+'\n')
-                ssai_urls.append(url)
-                break
-
-    master_file.close()
-    return ssai_urls
-
 
 def generateFinalCSV(childUrls, out):
     n=0
@@ -87,38 +27,48 @@ def generateFinalCSV(childUrls, out):
 
 if __name__ == '__main__' : 
 
-    matchId = sys.argv[1]
-    bearer = sys.argv[2]
-    masterUrls = getMasterManifestUrls(bearer, matchId)
-
-    print("\n******************** GOT {n} MASTER URLS ***********************************\n".format(n=len(masterUrls)))
-
-    child = open('child_layers.csv', 'w')
     childUrls=[]
-    
-    cnt=1
-    for master_url in masterUrls :
-        manifest = requests.get(master_url)
-        matches = re.finditer(r'(.*)(/hls.*)', manifest.text)
-        layers = 0
-        for match in matches:
-            relativeUrl=match.group(2)
-            childUrls.append(relativeUrl)
-            child.write(relativeUrl+'\n')
-            layers+=1
+    child = open('child_layers.csv', 'r')
 
-        print('> Parsed master manifest {cnt}. Found {layers} child layers!'.format(cnt=cnt,layers=layers))
-        cnt+=1
+    parser = ArgumentParser("Arguments", formatter_class=ArgumentDefaultsHelpFormatter)
+
+    parser.add_argument("-c","--ads_content_id", help="Content ID for Ads")
+    parser.add_argument("-m","--ads_si_match_id", help="Content ID for Ads")
+
+    args = vars(parser.parse_args())
+
+    ads_content_id = args["ads_content_id"]
+    ads_si_match_id = args["ads_si_match_id"]
+
+    if ads_content_id is None or ads_content_id == "":
+        print("Error : Content ID for Ads is missing.")
+        exit(1)
     
-    child.close()
+    if ads_si_match_id is None or ads_si_match_id == "":
+        print("Error : SIMatchID for Ads is missing.")
+        exit(1)
+
+    ####################################################################################################################
+ 
+    query_params = '?random=1-inallow-test-2023&content_id={ads_content_id}&language=hindi&resolution=320x180&hash=28ea&bandwidth=169400&media_codec=h264&audio_codec=aac&layer=child&playback_proto=http&playback_host=har-mock-server-dev-internal.npe.hotstar-labs.com&si_match_id={ads_si_match_id}'
+    query_params = query_params.format(ads_content_id = ads_content_id, ads_si_match_id = ads_si_match_id)
+
+    for url in child:
+        childUrls.append(url.strip()+query_params)
+    
+
     print('\n******************** GOT {n} CHILD LAYERS ***********************************\n'.format(n=len(childUrls)))
 
     print('> Generating final layes csv ... ')
-    final_layer = open('layers_final.csv', 'w')
+    final_layer = open('generated/layers_final.csv', 'w')
     n = generateFinalCSV(childUrls,final_layer)
     final_layer.close()
 
     print('\n******************** GENERATED LAYERS CSV WITH {n} ENTRIES ***************\n'.format(n=n))
+
+    exit(0)
+
+    ####################################################################################################################
 
 
 
