@@ -8,7 +8,7 @@ tailor_base_url = 'http://ssai-tailor-nginx-ingress-k8-pp.npe.hotstar-labs.com/'
 
 
 def getMasterManifestUrls(bearer, match_id):
-    master_file = open('master.csv', 'w')
+    master_file = open('generated/master.csv', 'w')
     cms_headers = {
         'Accept': '*/*',
         'Accept-Language': 'en-GB,en;q=0.9',
@@ -93,7 +93,7 @@ if __name__ == '__main__' :
 
     print("\n******************** GOT {n} MASTER URLS ***********************************\n".format(n=len(masterUrls)))
 
-    child = open('child_layers.csv', 'w')
+    child = open('generated/child_layers.csv', 'w')
     childUrls=[]
     
     cnt=1
@@ -114,7 +114,7 @@ if __name__ == '__main__' :
     print('\n******************** GOT {n} CHILD LAYERS ***********************************\n'.format(n=len(childUrls)))
 
     print('> Generating final layes csv ... ')
-    final_layer = open('layers_final.csv', 'w')
+    final_layer = open('generated/layers_final.csv', 'w')
     n = generateFinalCSV(childUrls,final_layer)
     final_layer.close()
 

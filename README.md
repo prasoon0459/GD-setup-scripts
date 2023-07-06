@@ -1,14 +1,14 @@
 ## Cohort Generation
 - Run `python3 cohort-generator.py <cohort_size>`
 - `cohort_size` = no of cohorts needed (must be a multiple of 20 for now as initial file contains 20 cohorts)
-- new csv `cohorts_final.csv` will be generated
+- new csv at `generated/cohorts_final.csv` will be generated
 
 ## Child Layer URL Generation
 * Run `python3 scrypt.py <match_id> <bearer>` 
 * `match_id` = match Id in CMS
 * `bearer` = CMS auth token
-* It will generate a csv `master.csv` with all `fhd` and `ssai` tagged master URLs
-* Then it will create a csv 	`child_layers.csv` with all child urls from the above master URLs
+* It will generate a csv at `generated/master.csv` with all `fhd` and `ssai` tagged master URLs
+* Then it will create a csv at `generated/child_layers.csv` with all child urls from the above master URLs
 * Then it will replicate the child URLs according to the distribution below
 - The first 12 layers are replicated as follows
 	| Layer | Count | Layer | Count |
