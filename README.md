@@ -5,7 +5,7 @@
 
 -  `cohort_size` = no of cohorts needed (must be a multiple of 20 for now as initial file contains 20 cohorts)
 
-- new csv `cohorts_final.csv` will be generated
+- new csv at `generated/cohorts_final.csv` will be generated
 
   
 

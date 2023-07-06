@@ -4,7 +4,7 @@ import sys
 
 cohort_size = int(sys.argv[1])
 lines = []
-out = open("cohorts_final.csv","w")
+out = open("generated/cohorts_final.csv","w")
 
 with open('cohorts_init.csv', mode ='r') as file:
     for line in csv.reader(file):
