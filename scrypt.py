@@ -63,25 +63,40 @@ def getMasterManifestUrls(bearer, match_id):
 
 def generateFinalCSV(childUrls, out):
     n=0
-    cnt_arr = [3840,2320,640,240,80,80,960,580,160,60,20,20]
+    cnt_arr = [3264,1972,544,204,68,68,816,493,136,51,17,17]
     l=len(childUrls)
     for i in range(0,12):
         for j in range(0,cnt_arr[i]):
             out.write(childUrls[i]+'\n')
             n+=1
 
-    a = ((l-12)/2)-1
+    # 7650 done
 
-    for i in range(0,800):
-        ind = random.randint(12,a)
+    for i in range (0, 1000):
+        ind = random.randint(12,23)
+        out.write(childUrls[ind]+'\n')
+        n+=1
+    # 1000 done
+
+    for i in range (0, 500):
+        ind = random.randint(24,35)
+        out.write(childUrls[ind]+'\n')
+        n+=1
+    # 500 done
+
+    a = 36 + ((l-36)/2)
+    
+    for i in range(0,680):
+        ind = random.randint(36,a-1)
         out.write(childUrls[ind]+'\n')
         n+=1
         
-    for i in range(0,200):
+    for i in range(0,170):
         ind = random.randint(a,l-1)
         out.write(childUrls[ind]+'\n')
         n+=1
     
+    # 850 done
     return n
 
 
